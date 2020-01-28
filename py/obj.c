@@ -330,7 +330,7 @@ mp_obj_t mp_obj_equality(mp_obj_t o1, mp_obj_t o2, mp_binary_op_t op) {
     }
 
     // generic type, call binary_op
-    mp_obj_type_t *type = mp_obj_get_type(o1);
+    const mp_obj_type_t *type = mp_obj_get_type(o1);
     if (type->binary_op != NULL) {
         mp_obj_t r = type->binary_op(op, o1, o2);
         if (r != MP_OBJ_NULL) {
