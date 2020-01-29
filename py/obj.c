@@ -202,79 +202,16 @@ bool mp_obj_is_callable(mp_obj_t o_in) {
 // Furthermore, from the v3.4.2 code for object.c: "Practical amendments: If rich
 // comparison returns NotImplemented, == and != are decided by comparing the object
 // pointer."
-/*
+//
 // mp_obj_equal has been made into a macro (see obj.h)
 // and its functionality is implemented in mp_obj_equality
-bool _mp_obj_equal(mp_obj_t o1, mp_obj_t o2) {
-    // Float (and complex) NaN is never equal to anything, not even itself,
-    // so we must have a special check here to cover those cases.
-    if (o1 == o2
-        #if MICROPY_PY_BUILTINS_FLOAT
-        && !mp_obj_is_float(o1)
-        #endif
-        #if MICROPY_PY_BUILTINS_COMPLEX
-        && !mp_obj_is_type(o1, &mp_type_complex)
-        #endif
-        ) {
-        return true;
-    }
-    if (o1 == mp_const_none || o2 == mp_const_none) {
-        return false;
-    }
-
-    // fast path for small ints
-    if (mp_obj_is_small_int(o1)) {
-        if (mp_obj_is_small_int(o2)) {
-            // both SMALL_INT, and not equal if we get here
-            return false;
-        } else {
-            mp_obj_t temp = o2; o2 = o1; o1 = temp;
-            // o2 is now the SMALL_INT, o1 is not
-            // fall through to generic op
-        }
-    }
-
-    // fast path for strings
-    if (mp_obj_is_str(o1)) {
-        if (mp_obj_is_str(o2)) {
-            // both strings, use special function
-            return mp_obj_str_equal(o1, o2);
-        } else {
-            // a string is never equal to anything else
-            goto str_cmp_err;
-        }
-    } else if (mp_obj_is_str(o2)) {
-        // o1 is not a string (else caught above), so the objects are not equal
-    str_cmp_err:
-        #if MICROPY_PY_STR_BYTES_CMP_WARN
-        if (mp_obj_is_type(o1, &mp_type_bytes) || mp_obj_is_type(o2, &mp_type_bytes)) {
-            mp_warning(MP_WARN_CAT(BytesWarning), "Comparison between bytes and str");
-        }
-        #endif
-        return false;
-    }
-
-    // generic type, call binary_op(MP_BINARY_OP_EQUAL)
-    const mp_obj_type_t *type = mp_obj_get_type(o1);
-    if (type->binary_op != NULL) {
-        mp_obj_t r = type->binary_op(MP_BINARY_OP_EQUAL, o1, o2);
-        if (r != MP_OBJ_NULL) {
-            return r == mp_const_true ? true : false;
-        }
-    }
-
-    // equality not implemented, and objects are not the same object, so
-    // they are defined as not equal
-    return false;
-}
-*/
-// mp_obj_equality replaces mp_obj_equal
 // two main differences:
 // 1. it calls op for MP_BINARY_OP_EQUAL and MP_BINARY_OP_NOT_EQUAL,
 //    allowing classes to overload both operators
 // 2. it returns an mp_obj_t instead of true or false. In this way classes
 //    can return whatever they want as a result of an equality comparison,
 //    e.g. numpy returns boolean vectors as a result of comparison.
+//
 #define MP_OBJ_EQUALITY_TRUE(op) (op == MP_BINARY_OP_EQUAL ? mp_const_true : mp_const_false)
 #define MP_OBJ_EQUALITY_FALSE(op) (op == MP_BINARY_OP_EQUAL ? mp_const_false : mp_const_true)
 mp_obj_t mp_obj_equality(mp_obj_t o1, mp_obj_t o2, mp_binary_op_t op) {
@@ -345,7 +282,8 @@ mp_obj_t mp_obj_equality(mp_obj_t o1, mp_obj_t o2, mp_binary_op_t op) {
                     return mp_const_true;
                 } else {
                     // cannot decide, return default but issue warning
-                    mp_warning(MP_WARN_CAT(Warning), "Cannot decide if unequal; implement method __not_equal to resolve.");
+                    mp_warning(MP_WARN_CAT(RuntimeWarning),
+                               "Cannot decide if unequal; implement method __not_equal to resolve.");
                 }
             }
         }
