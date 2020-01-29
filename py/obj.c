@@ -218,13 +218,13 @@ mp_obj_t mp_binary_op_equal(mp_binary_op_t op, mp_obj_t o1, mp_obj_t o2) {
     // Float (and complex) NaN is never equal to anything, not even itself,
     // so we must have a special check here to cover those cases.
     if (o1 == o2
-#if MICROPY_PY_BUILTINS_FLOAT
+        #if MICROPY_PY_BUILTINS_FLOAT
         && !mp_obj_is_float(o1)
-#endif
-#if MICROPY_PY_BUILTINS_COMPLEX
+        #endif
+        #if MICROPY_PY_BUILTINS_COMPLEX
         && !mp_obj_is_type(o1, &mp_type_complex)
-#endif
-            ) {
+        #endif
+        ) {
         return MP_OBJ_EQUALITY_TRUE(op);
     }
     if (o1 == mp_const_none || o2 == mp_const_none) {
@@ -257,12 +257,12 @@ mp_obj_t mp_binary_op_equal(mp_binary_op_t op, mp_obj_t o1, mp_obj_t o2) {
         }
     } else if (mp_obj_is_str(o2)) {
         // o1 is not a string (else caught above), so the objects are not equal
-        str_cmp_err:
-#if MICROPY_PY_STR_BYTES_CMP_WARN
+    str_cmp_err:
+        #if MICROPY_PY_STR_BYTES_CMP_WARN
         if (mp_obj_is_type(o1, &mp_type_bytes) || mp_obj_is_type(o2, &mp_type_bytes)) {
             mp_warning(MP_WARN_CAT(BytesWarning), "Comparison between bytes and str");
         }
-#endif
+        #endif
         return MP_OBJ_EQUALITY_FALSE(op);
     }
 
