@@ -214,7 +214,7 @@ bool mp_obj_is_callable(mp_obj_t o_in) {
 //
 #define MP_OBJ_EQUALITY_TRUE(op) (op == MP_BINARY_OP_EQUAL ? mp_const_true : mp_const_false)
 #define MP_OBJ_EQUALITY_FALSE(op) (op == MP_BINARY_OP_EQUAL ? mp_const_false : mp_const_true)
-mp_obj_t mp_obj_equality(mp_obj_t o1, mp_obj_t o2, mp_binary_op_t op) {
+mp_obj_t mp_binary_op_equal(mp_binary_op_t op, mp_obj_t o1, mp_obj_t o2) {
     // Float (and complex) NaN is never equal to anything, not even itself,
     // so we must have a special check here to cover those cases.
     if (o1 == o2
